@@ -104,5 +104,5 @@ while running:
                 game_state = INVENTORY
             elif no_rect.collidepoint(x, y):
                 game_state = CHOICE
-
+print("popa")
 pygame.quit()
