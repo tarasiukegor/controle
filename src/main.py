@@ -17,6 +17,7 @@ pygame.display.set_caption("RPG Adventure")
 # player_surface = pygame.image.load('controle/assets/player_stand.png')
 # player_surface = pygame.transform.scale(player_surface,(40,50))
 
+print("popa")
 
 while True:
 
