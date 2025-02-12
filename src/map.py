@@ -2,8 +2,18 @@ from graphes import Graphe
 import pygame
 # from main import screen
 pygame.init()
-width,heigth = 800,200
+width,heigth = 800,600
 font = pygame.font.Font(None,20)
+
+
+class GameState():
+    def __init__(self):
+        self.current_location = "Rue"
+        self.game_state = "Village"
+
+    
+gamestate = GameState()
+
 def create_location(name,sommets_cord,liens):
     name = Graphe()
     for sommet,cord in sommets_cord:
@@ -13,28 +23,38 @@ def create_location(name,sommets_cord,liens):
     return name
 
 
-village = create_location('village',
-                        [['Rue', (width//2,heigth//2)],["Auberge",(100,300)],['Forge', (500,200)],["Marche",(150,100)]], 
-                        [('Rue','Auberge'),('Rue','Forge'),('Rue','Marche')])
+village = create_location('Village',
+                        [['Rue', (width//2,heigth//2)],
+                        ["auberge strasbourg",(100,300)],
+                        ['Forge', (500,200)],
+                        ["Marche",(150,100)]],
+
+                        [('Rue','auberge strasbourg'),
+                        ('Rue','Forge'),
+                        ('Rue','Marche')]
+                        )
 
 
 # ["Auberge",(100,100)],['Forge', (500),(200)],["Marche",(150,100)]
 
 # ('Rue','Forge'),('Rue','Marche')
 
-def draw_loc(location_name,screen):
-    for i in village._location:
-        screen.blit(font.render(i,True,(0,0,0)),location_name._location[i])
-        for loca in village.liste_voisins(i):
+def draw_loc(location_name,screen,asset):
+    surf = pygame.image.load(asset)
+    surf = pygame.transform.scale(surf, (width,heigth))
+    screen.blit(surf, (0,0))
+    for name, coord in village._location.items():
+        color = (0,255,0) if name == gamestate.current_location else (0,0,255)
+     
+        pygame.draw.circle(screen,color, coord,20)
+        screen.blit(font.render(name,True,(255,255,255)),coord)
 
-            pygame.draw.line(screen,(0,0,0),location_name._location[i],location_name._location[loca])
+        for loca in village.liste_voisins(name):
 
-for i in village._location:
-    print(village._location[i])
-
+            pygame.draw.line(screen,(255,255,255),coord,location_name._location[loca])
 
 
-print(village)
-print(village.liste_sommets()) 
-print(village._data)
-print(village._location)   
+
+# print(f"liste des sommets: {village.liste_sommets()}") 
+# print(f'des arrets: {village._data}')
+# print(f"des coords: {village._location}")   

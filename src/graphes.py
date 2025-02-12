@@ -3,7 +3,7 @@ class Graphe:
         self._data = dict()
         self._location = dict()
         
-    def ajouter_sommet(self,sommet,cord):
+    def ajouter_sommet(self,sommet,cord): # (x,y)
         if sommet in self._data:
             raise(SommetError("sommet déjà présent"))            
         self._data[sommet] = []
@@ -95,7 +95,9 @@ class GraphePondere:
             ligne.append(None)
         self._mat.append( [ None for i in range(n+1) ] )
 
-    def ajouter_arc(self,A,B,e):
+    def ajouter_arc(self,A,B,e = None):
+        if e == None:
+            e = lambda x : print(B)
         try:
             nA = self._numero[A]
             nB = self._numero[B]
@@ -103,7 +105,7 @@ class GraphePondere:
             raise(SommetError("Sommet non trouvé"))
         self._mat[nA][nB] = e
 
-    def ajouter_arete(self,A,B,e):
+    def ajouter_arete(self,A,B,e = None):
         self.ajouter_arc(A,B,e)
         self.ajouter_arc(B,A,e)
 
@@ -139,9 +141,9 @@ class GraphePondere:
             total += self.poids(L[i],L[i+1])
         return total
 
-# PlanPoincaBis = GraphePondere()
-# for s in ['Rue','Aqua','EscalierB','214','EscalierC','Cour']:
-#     PlanPoincaBis.ajouter_sommet(s)
+PlanPoincaBis = GraphePondere()
+for s in ['Rue','Aqua','EscalierB','214','EscalierC','Cour']:
+    PlanPoincaBis.ajouter_sommet(s)
 
-# for a,b,e in [('Aqua','Rue',10),('Aqua','EscalierB',15),('EscalierB','214',5),('214','EscalierC',25),('EscalierC','Cour',10),('Cour','Aqua',10)]:
-#     PlanPoincaBis.ajouter_arete(a,b,e)
+for a,b,e in [('Aqua','Rue',10),('Aqua','EscalierB',15),('EscalierB','214',5),('214','EscalierC',25),('EscalierC','Cour',10),('Cour','Aqua',10)]:
+    PlanPoincaBis.ajouter_arete(a,b,e)
