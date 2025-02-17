@@ -1,55 +1,86 @@
 import pygame
+import textwrap
 from sys import exit
-from graphes import Graphe
-from map import gamestate, village, draw_loc
-from click import handle_click
-# Initialize pygame
+from map import gamestate, draw_loc, WIDTH,HEIGHT, strasbourg,inside_locations,draw_inside, font
+from click import handle_click, handle_inside_click 
+from dialogue import *
+
 pygame.init()
-
-font = pygame.font.Font(None,36)
-
-# Screen settings
-WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("RPG Adventure")
-# map_surface = pygame.image.load('assets/map.png')
-# map_surface = pygame.transform.scale(map_surface, (800,600))
-# player_surface = pygame.image.load('controle/assets/player_stand.png')
-# player_surface = pygame.transform.scale(player_surface,(40,50))
+pygame.display.set_caption("Controle")
 
-print("popa")
+
 
 while True:
+    
+
+    if gamestate.game_state == "Inside" and gamestate.current_location in inside_locations:
+        draw_inside(inside_locations[gamestate.current_location], screen, inside_locations[gamestate.current_location]._asset)
+    else:
+        draw_loc(strasbourg, screen, "Controle/assets/map.png")
+
+    if gamestate.current_npc:
+
+        s = pygame.Surface((1000,750))  
+        s.set_alpha(200)      # set alpha pour changer le "opacity" de couleur         
+        s.fill("Black")          
+        screen.blit(s, (0,0)) 
+        
+        automate_npc = dialogue_systems[gamestate.current_npc]
+        wrapped_text = textwrap.wrap(automate_npc._oujesuis, width=60)
+        y_offset = 100  # y pour placer des responses
+        for line in wrapped_text:
+            text_surface = font.render(line, True, "white")
+            screen.blit(text_surface, (100, y_offset))
+            y_offset += 30  # augemente y
+        
+        choices = automate_npc.liste_transition()
+        choice_buttons = []
+        
+        for i, choice in enumerate(choices):
+            button_x, button_y = 70, 300 + i * 40
+            button_width, button_height = 600, 30
+
+            button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
+            pygame.draw.rect(screen, "bisque4", button_rect)
+
+            text_surface = font.render(choice, True, "White")
+            text_rect = text_surface.get_rect(center=button_rect.center) 
+            screen.blit(text_surface, text_rect.topleft)
+
+            choice_buttons.append((button_rect, choice))
+        
+        exit_button_rect = pygame.Rect(680, 560, 120, 40)
+        pygame.draw.rect(screen, "brown1", exit_button_rect)
+        exit_text = font.render("Exit", True, "White")
+        text_rect = exit_text.get_rect(center=exit_button_rect.center)
+        screen.blit(exit_text, text_rect)
 
 
-    screen.fill(('White'))
 
-    
-    
-    
-    draw_loc(village,screen,"controle/assets/map.png")
-    
     for event in pygame.event.get():
+        
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if gamestate.game_state == "Village":
-                handle_click(event.pos,village)
+            if gamestate.current_npc:
+                npc_dialogue = dialogue_systems[gamestate.current_npc]
+                for button_rect, choice in choice_buttons:
+                    if button_rect.collidepoint(event.pos):
+                        npc_dialogue.transition(choice)
+                        break  
                 
-            elif gamestate.game_state == "inside":
-                print(f'you are inside of {gamestate.current_location}')
+                if exit_button_rect.collidepoint(event.pos):
+                    gamestate.current_npc = None 
+            else:
+                if gamestate.game_state == "Strasbourg Map":
+                    handle_click(event.pos, strasbourg)
+                elif gamestate.game_state == "Inside":
+                    handle_inside_click(event.pos, inside_locations[gamestate.current_location])
 
     
-    pygame.display.update() 
+
+    pygame.display.update()
     
-
-
-
-
-
-
-
-
-

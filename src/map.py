@@ -1,60 +1,111 @@
 from graphes import Graphe
 import pygame
-# from main import screen
-pygame.init()
-width,heigth = 800,600
-font = pygame.font.Font(None,20)
 
+pygame.init()
+
+font = pygame.font.Font("Controle/assets/fonts/Minecraft.ttf", 20)
+WIDTH, HEIGHT = 800, 600
 
 class GameState():
     def __init__(self):
-        self.current_location = "Rue"
-        self.game_state = "Village"
+        self.current_location = "Strasbourg Square"
+        self.game_state = "Strasbourg Map"
+        self.inside_posistion = None
+        self.current_npc = None
+        self.inventory = []
+        self.money = 150
 
     
+    def start_dialogue(self,npc):
+        self.current_npc = npc
+
+    def exit_dialogue(self):
+        self.current_npc = None
+
+
 gamestate = GameState()
 
-def create_location(name,sommets_cord,liens):
-    name = Graphe()
-    for sommet,cord in sommets_cord:
-        name.ajouter_sommet(sommet,cord) 
-    for sommet1,sommet2 in liens:
-        name.ajouter_arete(sommet1,sommet2)
-    return name
+
+def create_location(name,sommets_cord, liens, asset):
+    graph = Graphe(name,asset)
+    
+    for sommet, cord in sommets_cord:
+        graph.ajouter_sommet(sommet, cord)
+
+    for sommet1, sommet2 in liens:
+        graph.ajouter_arete(sommet1, sommet2)
+
+    return graph
+
+def create_inside_location(name,sommets_cord, liens,asset):
+    return create_location(name,sommets_cord, liens,asset)
 
 
-village = create_location('Village',
-                        [['Rue', (width//2,heigth//2)],
-                        ["auberge strasbourg",(100,300)],
-                        ['Forge', (500,200)],
-                        ["Marche",(150,100)]],
+strasbourg = create_location("Strasbourg Map",
+    [["Strasbourg Square", (WIDTH // 2, HEIGHT // 2)],
+     ["Strasbourg Tavern", (100, 300)],
+     ["Strasbourg Forge", (500, 200)],
+     ["Strasbourg Marche", (150, 100)]],
 
-                        [('Rue','auberge strasbourg'),
-                        ('Rue','Forge'),
-                        ('Rue','Marche')]
-                        )
+    [("Strasbourg Square", "Strasbourg Tavern"),
+     ("Strasbourg Square", "Strasbourg Forge"),
+     ("Strasbourg Square", "Strasbourg Marche")],
+     "Controle/assets/map.png"
+
+)
+
+strasbourg_tavern = create_inside_location("Tavern",
+    [["Entrance", (WIDTH // 2, HEIGHT - 100)],
+     ["Bar", (WIDTH // 2, HEIGHT // 2)],
+     ["Barman", (WIDTH // 4, HEIGHT // 3)],
+     ["Ivrogne", (WIDTH - 200, HEIGHT // 3)]],
+
+    [("Entrance", "Bar"),
+     ("Bar", "Barman"),
+     ("Bar", "Ivrogne")],
+    "Controle/assets/tavern_bg.png"
+)
+
+strasbourg_forge = create_inside_location("Forge",
+    [["Entrance", (WIDTH // 2, HEIGHT - 100)],
+     ["Anvil", (WIDTH // 2, HEIGHT // 2)],
+     ["Smith", (WIDTH - 200, HEIGHT // 3)]],
+
+    [("Entrance", "Anvil"),
+     ("Anvil", "Smith")],
+    "Controle/assets/test_pic.jpg"
+)
+
+inside_locations = {
+    "Strasbourg Tavern": strasbourg_tavern,
+    "Strasbourg Forge": strasbourg_forge
+}
+
+def draw_loc(location_name, screen, asset):
+    surface = pygame.transform.scale(pygame.image.load(asset), (WIDTH, HEIGHT))
+    screen.blit(surface, (0, 0))
+
+    for name, coord in location_name._location.items():
+        color = "Green" if name == gamestate.current_location else "Blue"
+        pygame.draw.circle(screen, color, coord, 20)
+        screen.blit(font.render(name, True, "White"), coord)
+
+        for loca in location_name.liste_voisins(name):
+            pygame.draw.line(screen, "White", coord, location_name._location[loca])
 
 
-# ["Auberge",(100,100)],['Forge', (500),(200)],["Marche",(150,100)]
+def draw_inside(location_name, screen, asset):
+    surface = pygame.transform.scale(pygame.image.load(asset), (WIDTH, HEIGHT))
+    screen.blit(surface, (0, 0))
 
-# ('Rue','Forge'),('Rue','Marche')
+    for name, coord in location_name._location.items():
+        color = "Yellow" if name in ["Ivrogne","Barman"] else "Blue"
+        if name == gamestate.inside_posistion:
+            color = "Green"
+        pygame.draw.circle(screen, color, coord, 20)
+        screen.blit(font.render(name, True, "White"), coord)
 
-def draw_loc(location_name,screen,asset):
-    surf = pygame.image.load(asset)
-    surf = pygame.transform.scale(surf, (width,heigth))
-    screen.blit(surf, (0,0))
-    for name, coord in village._location.items():
-        color = (0,255,0) if name == gamestate.current_location else (0,0,255)
-     
-        pygame.draw.circle(screen,color, coord,20)
-        screen.blit(font.render(name,True,(255,255,255)),coord)
-
-        for loca in village.liste_voisins(name):
-
-            pygame.draw.line(screen,(255,255,255),coord,location_name._location[loca])
-
-
-
-# print(f"liste des sommets: {village.liste_sommets()}") 
-# print(f'des arrets: {village._data}')
-# print(f"des coords: {village._location}")   
+        for loca in location_name.liste_voisins(name):
+            pygame.draw.line(screen, "White", coord, location_name._location[loca])
+    pygame.draw.rect(screen, "Red", (20, HEIGHT - 50, 100, 40)) 
+    screen.blit(font.render("Exit", True, "White"), (40, HEIGHT - 45))  

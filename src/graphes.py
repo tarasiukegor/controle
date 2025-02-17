@@ -1,7 +1,9 @@
 class Graphe:
-    def __init__(self):
+    def __init__(self, name, asset):
+        self._name = name
         self._data = dict()
         self._location = dict()
+        self._asset = asset
         
     def ajouter_sommet(self,sommet,cord): # (x,y)
         if sommet in self._data:
@@ -70,14 +72,6 @@ class ArcError(Exception):
     pass
 
 
-
-# PlanPoinca = Graphe()
-# for s in ['Rue','Aqua','EscalierB','214','EscalierC','Cour']:
-#     PlanPoinca.ajouter_sommet(s)
-
-# for a,b in [('Aqua','Rue'),('Aqua','EscalierB'),('EscalierB','214'),('214','EscalierC'),('EscalierC','Cour'),('Cour','Aqua')]:
-#     PlanPoinca.ajouter_arete(a,b)
-
     
 class GraphePondere:
     def __init__(self):
@@ -95,9 +89,9 @@ class GraphePondere:
             ligne.append(None)
         self._mat.append( [ None for i in range(n+1) ] )
 
-    def ajouter_arc(self,A,B,e = None):
-        if e == None:
-            e = lambda x : print(B)
+    def ajouter_arc(self,A,B,e):
+        # if e == None:
+        #     e = lambda x : print(B)
         try:
             nA = self._numero[A]
             nB = self._numero[B]
@@ -141,9 +135,9 @@ class GraphePondere:
             total += self.poids(L[i],L[i+1])
         return total
 
-PlanPoincaBis = GraphePondere()
-for s in ['Rue','Aqua','EscalierB','214','EscalierC','Cour']:
-    PlanPoincaBis.ajouter_sommet(s)
+# PlanPoincaBis = GraphePondere()
+# for s in ['Rue','Aqua','EscalierB','214','EscalierC','Cour']:
+#     PlanPoincaBis.ajouter_sommet(s)
 
-for a,b,e in [('Aqua','Rue',10),('Aqua','EscalierB',15),('EscalierB','214',5),('214','EscalierC',25),('EscalierC','Cour',10),('Cour','Aqua',10)]:
-    PlanPoincaBis.ajouter_arete(a,b,e)
+# for a,b,e in [('Aqua','Rue',10),('Aqua','EscalierB',15),('EscalierB','214',5),('214','EscalierC',25),('EscalierC','Cour',10),('Cour','Aqua',10)]:
+#     PlanPoincaBis.ajouter_arete(a,b,e)
