@@ -12,9 +12,6 @@ class Graphe:
         self._location[sommet] = cord
 
     
-
-
-        
     def supprimer_sommet(self,sommet,f=False):
         if sommet not in self._data:
             raise(SommetError("sommet n'existe pas"))
@@ -78,7 +75,8 @@ class GraphePondere:
         self._sommets = [] # indice : numéro, valeur : nomsommet
         self._numero = dict() # clé : nomsommet , valeur : numéro
         self._mat = [[]]
-        
+        self._commands ={}
+
     def ajouter_sommet(self,sommet):
         if sommet in self._numero:
             raise(SommetError("sommet déjà présent"))
@@ -89,19 +87,67 @@ class GraphePondere:
             ligne.append(None)
         self._mat.append( [ None for i in range(n+1) ] )
 
-    def ajouter_arc(self,A,B,e):
-        # if e == None:
-        #     e = lambda x : print(B)
+    def ajouter_arc(self,A,B,e, commands=None):
         try:
             nA = self._numero[A]
             nB = self._numero[B]
         except KeyError:
             raise(SommetError("Sommet non trouvé"))
+        
         self._mat[nA][nB] = e
+        
+        # self._commands[(A, B)] = commands if commands else []
+    
+        self._commands[(A, B)] = [] # on definit la liste des commands
+
+        if commands: # si il ya des commands
+            if not isinstance(commands, list):  
+                raise ValueError("ca doit etre un liste") # errreur si c'est pas une liste 
+        
+            for command in commands: 
+                if isinstance(command, tuple) and callable(command[0]):  
+                    self._commands[(A, B)].append(command) 
+                elif callable(command):  
+                    self._commands[(A, B)].append((command, ())) 
+                else:
+                    raise ValueError("invalid fomat")
+
+
 
     def ajouter_arete(self,A,B,e = None):
         self.ajouter_arc(A,B,e)
         self.ajouter_arc(B,A,e)
+
+    def supprimer_arc(self, A, B):
+        try:
+            nA = self._numero[A]
+            nB = self._numero[B]
+        except KeyError:
+            raise SommetError("Sommet non trouvé")
+        self._mat[nA][nB] = None
+
+    def supprimer_sommet(self, sommet):
+        if sommet not in self._numero:
+            raise SommetError("Sommet non trouvé")
+
+        index = self._numero.pop(sommet)
+        self._sommets.pop(index)
+
+        self._mat.pop(index)
+        for row in self._mat:
+            row.pop(index)
+
+        for i, s in enumerate(self._sommets):
+            self._numero[s] = i
+
+    def supprimer_tous_arcs(self):
+        n = len(self._sommets)
+        self._mat = [[None] * n for _ in range(n)] 
+
+    def supprimer_tous_sommets(self):
+        self._sommets.clear()
+        self._numero.clear()
+        self._mat = [[]]
 
     def liste_sommets(self):
         return self._sommets.copy()
@@ -134,10 +180,3 @@ class GraphePondere:
         for i in range(len(L)-1):
             total += self.poids(L[i],L[i+1])
         return total
-
-# PlanPoincaBis = GraphePondere()
-# for s in ['Rue','Aqua','EscalierB','214','EscalierC','Cour']:
-#     PlanPoincaBis.ajouter_sommet(s)
-
-# for a,b,e in [('Aqua','Rue',10),('Aqua','EscalierB',15),('EscalierB','214',5),('214','EscalierC',25),('EscalierC','Cour',10),('Cour','Aqua',10)]:
-#     PlanPoincaBis.ajouter_arete(a,b,e)

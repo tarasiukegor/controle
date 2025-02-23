@@ -4,34 +4,36 @@ from sys import exit
 from map import gamestate, draw_loc, WIDTH,HEIGHT, strasbourg,inside_locations,draw_inside, font
 from click import handle_click, handle_inside_click 
 from dialogue import *
+from intro import *
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Controle")
 
 
+run_intro(screen)
 
 while True:
-    
-
+    screen.fill('black')
     if gamestate.game_state == "Inside" and gamestate.current_location in inside_locations:
         draw_inside(inside_locations[gamestate.current_location], screen, inside_locations[gamestate.current_location]._asset)
-    else:
+    
+    if gamestate.game_state == "Strasbourg Map":
         draw_loc(strasbourg, screen, "Controle/assets/map.png")
 
     if gamestate.current_npc:
 
-        s = pygame.Surface((1000,750))  
-        s.set_alpha(200)      # set alpha pour changer le "opacity" de couleur         
-        s.fill("Black")          
-        screen.blit(s, (0,0)) 
+        background_npc = pygame.Surface((WIDTH,HEIGHT))  
+        background_npc.set_alpha(200)           # set alpha pour changer le "opacity" de couleur
+        background_npc.fill("Black")              
+        screen.blit(background_npc, (0,0)) 
         
         automate_npc = dialogue_systems[gamestate.current_npc]
-        wrapped_text = textwrap.wrap(automate_npc._oujesuis, width=60)
-        y_offset = 100  # y pour placer des responses
+        wrapped_text = textwrap.wrap(automate_npc._oujesuis, width=55)
+        y_offset = 20  # y pour placer des phrases         
         for line in wrapped_text:
             text_surface = font.render(line, True, "white")
-            screen.blit(text_surface, (100, y_offset))
+            screen.blit(text_surface, (30, y_offset))
             y_offset += 30  # augemente y
         
         choices = automate_npc.liste_transition()
@@ -51,10 +53,12 @@ while True:
             choice_buttons.append((button_rect, choice))
         
         exit_button_rect = pygame.Rect(680, 560, 120, 40)
-        pygame.draw.rect(screen, "brown1", exit_button_rect)
         exit_text = font.render("Exit", True, "White")
         text_rect = exit_text.get_rect(center=exit_button_rect.center)
-        screen.blit(exit_text, text_rect)
+        if not automate_npc.liste_transition():
+
+            pygame.draw.rect(screen, (0,0,0,100), exit_button_rect)
+            screen.blit(exit_text, text_rect)
 
 
 
@@ -78,6 +82,7 @@ while True:
                 if gamestate.game_state == "Strasbourg Map":
                     handle_click(event.pos, strasbourg)
                 elif gamestate.game_state == "Inside":
+                        
                     handle_inside_click(event.pos, inside_locations[gamestate.current_location])
 
     
